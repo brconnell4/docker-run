@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 
 async function runDockerCommand(imageName, envVars) {
-    let dockerArgs = ['run', '-d'];
+    let dockerArgs = ['run'];
 
     // Iterate through the dynamic input variables and add them as environment variables to the Docker run command
     for (const [key, value] of Object.entries(envVars)) {
@@ -19,7 +19,7 @@ async function runDockerCommand(imageName, envVars) {
 
     dockerArgs.push(imageName);
 
-    // Run the Docker command
+    // Run the Docker command without the '-d' flag to keep the container running in the foreground
     await exec.exec('docker', dockerArgs);
 }
 
