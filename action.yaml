@@ -10,6 +10,10 @@ inputs:
   env_variables:
     description: "JSON object with dynamic environment variables"
     required: false
+  INTEGRATION_TESTING:
+    description: "Run Integration Tests"
+    required: false
+    default: "false"
 outputs:
   MESSAGE:
     description: "Output of docker run command"
