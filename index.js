@@ -6,7 +6,8 @@ async function runDockerCommand(imageName, envVars) {
 
     // Iterate through the dynamic input variables and add them as environment variables to the Docker run command
     for (const [key, value] of Object.entries(envVars)) {
-        dockerArgs.push('-e', `${key}=${value}`);
+        const replacedValue = replacePlaceholders(value);
+        dockerArgs.push('-e', `${key}=${replacedValue}`);
     }
 
     // Export the default environment variables for the Docker run command
@@ -22,25 +23,29 @@ async function runDockerCommand(imageName, envVars) {
     await exec.exec('docker', dockerArgs);
 }
 
+function replacePlaceholders(value) {
+    // Use a regular expression to find placeholders in the format '${{ env.VARIABLE_NAME }}' or '${{ inputs.INPUT_NAME }}'
+    const regex = /\${{\s*(env|secrets|inputs)\.([A-Za-z_]+)\s*}}/g;
+    let result = value;
+
+    // Replace each placeholder found in the value with its corresponding environment variable value
+    result = result.replace(regex, (match, group1, group2) => {
+        const prefix = group1 === 'env' ? '' : group1 + '.';
+        return process.env[prefix + group2] || '';
+    });
+
+    return result;
+}
+
 try {
-    const imageName = core.getInput('image_name');
-
-    // Prepare an object to hold the dynamic input variables
-    const inputVars = {};
-
-    // Retrieve all the input variables from the GitHub workflow
-    for (const envVar of process.env) {
-        if (envVar.startsWith('INPUT_')) {
-            const inputVarName = envVar.slice(6);
-            const inputVarValue = process.env[envVar];
-            inputVars[inputVarName] = inputVarValue;
-        }
-    }
+    const imageName = core.getInput('image');
+    const envVarsJSON = core.getInput('env_variables');
+    const envVars = JSON.parse(envVarsJSON);
 
     // Your action logic here, if needed...
 
     // Perform the Docker run command
-    runDockerCommand(imageName, inputVars)
+    runDockerCommand(imageName, envVars)
         .then(() => {
             console.log('Docker run command successfully executed.');
         })
