@@ -7,6 +7,9 @@ inputs:
   image:
     description: "Name of the Docker image to run"
     required: true
+  env_variables:
+    description: "JSON object with dynamic environment variables"
+    required: false
 outputs:
   MESSAGE:
     description: "Output of docker run command"
