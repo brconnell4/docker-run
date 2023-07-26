@@ -39,7 +39,11 @@ function replacePlaceholders(value) {
 
 try {
     const imageName = core.getInput('image');
-    const envVarsJSON = core.getInput('env_variables');
+    let envVarsJSON = core.getInput('env_variables');
+
+    // Remove any trailing commas from the input
+    envVarsJSON = envVarsJSON.replace(/,\s*$/, '');
+
     const envVars = JSON.parse(envVarsJSON);
 
     // Your action logic here, if needed...
